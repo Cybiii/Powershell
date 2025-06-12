@@ -40,9 +40,13 @@ void execute_command(const std::string &command,
   si.cb = sizeof(si);
   ZeroMemory(&pi, sizeof(pi));
 
+  std::vector<char> command_line_buffer(command_line.begin(),
+                                        command_line.end());
+  command_line_buffer.push_back('\0');
+
   // Start the child process.
   if (!CreateProcessA(NULL, // No module name (use command line)
-                      (LPSTR)command_line.c_str(), // Command line
+                      command_line_buffer.data(), // Command line
                       NULL,  // Process handle not inheritable
                       NULL,  // Thread handle not inheritable
                       FALSE, // Set handle inheritance to FALSE
