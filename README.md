@@ -62,7 +62,7 @@ This project uses CMake to generate build files.
 
     ```bash
     git clone <repository-url>
-    cd MyShell
+    cd Powershell
     ```
 
 2.  **Create a build directory:**
@@ -88,18 +88,18 @@ This project uses CMake to generate build files.
       make
       ```
 
-The executable `myshell` (or `myshell.exe` on Windows) will be created in the `build` directory.
+The executable `shell` (or `shell.exe` on Windows) will be created in the `build` directory.
 
 ## Running the Shell
 
 Navigate to the build directory and run the executable:
 
 ```bash
-./myshell
+./shell
 ```
 
 Or on Windows:
 
 ```bash
-.\\myshell.exe
+.\\shell.exe
 ```
