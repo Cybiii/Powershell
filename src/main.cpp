@@ -60,7 +60,15 @@ void execute_command(const std::string &command,
                       &si,   // Pointer to STARTUPINFO structure
                       &pi)   // Pointer to PROCESS_INFORMATION structure
   ) {
-    std::cerr << "CreateProcess failed (" << GetLastError() << ").\n";
+    DWORD error = GetLastError();
+    if (error == ERROR_FILE_NOT_FOUND) {
+      fprintf(stderr,
+              "%s: The term '%s' is not recognized as the name of a command, "
+              "function, or operable program.\n",
+              command.c_str(), command.c_str());
+    } else {
+      fprintf(stderr, "CreateProcess failed (%lu).\n", error);
+    }
     return;
   }
 
@@ -89,7 +97,7 @@ int main() {
   while (true) {
     char buffer[MAX_PATH];
     if (GetCurrentDirectoryA(MAX_PATH, buffer)) {
-      printf("PS %s> ", buffer);
+      printf("Shell %s> ", buffer);
     } else {
       printf("MyShell> ");
     }
