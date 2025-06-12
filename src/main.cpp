@@ -5,6 +5,7 @@
 #include <windows.h> // For CreateProcess on Windows
 
 #include "filesystem.hpp"
+#include "input.hpp"
 #include "system.hpp"
 #include "text.hpp"
 
@@ -102,9 +103,7 @@ int main() {
       printf("MyShell> ");
     }
 
-    if (!std::getline(std::cin, input_line)) {
-      break; // Handle EOF (Ctrl+D or Ctrl+Z)
-    }
+    input_line = get_line_with_history(history);
 
     if (input_line.empty()) {
       continue;
