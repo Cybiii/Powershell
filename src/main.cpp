@@ -5,6 +5,8 @@
 #include <windows.h> // For CreateProcess on Windows
 
 #include "filesystem.hpp"
+#include "system.hpp"
+#include "text.hpp"
 
 // Function to split a string by a delimiter
 std::vector<std::string> split_string(const std::string &s, char delimiter) {
@@ -78,10 +80,20 @@ int main() {
   dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
   SetConsoleMode(hOut, dwMode);
 
+  printf("Hi there! The Shell is running. v1.0 -- http://sebastiansebs.com\n");
+  printf("A simple cross-platform shell implemented in C++\n\n");
+
   std::string input_line;
+  std::vector<std::string> history;
 
   while (true) {
-    std::cout << "MyShell> ";
+    char buffer[MAX_PATH];
+    if (GetCurrentDirectoryA(MAX_PATH, buffer)) {
+      printf("PS %s> ", buffer);
+    } else {
+      printf("MyShell> ");
+    }
+
     if (!std::getline(std::cin, input_line)) {
       break; // Handle EOF (Ctrl+D or Ctrl+Z)
     }
@@ -89,6 +101,8 @@ int main() {
     if (input_line.empty()) {
       continue;
     }
+
+    history.push_back(input_line);
 
     std::vector<std::string> tokens = split_string(input_line, ' ');
 
@@ -146,6 +160,22 @@ int main() {
       command_mv(arguments);
     } else if (command == "cp") {
       command_cp(arguments);
+    } else if (command == "history") {
+      for (size_t i = 0; i < history.size(); ++i) {
+        printf(" %zu: %s\n", i + 1, history[i].c_str());
+      }
+    } else if (command == "date") {
+      command_date(arguments);
+    } else if (command == "hostname") {
+      command_hostname(arguments);
+    } else if (command == "cat") {
+      command_cat(arguments);
+    } else if (command == "grep") {
+      command_grep(arguments);
+    } else if (command == "head") {
+      command_head(arguments);
+    } else if (command == "tail") {
+      command_tail(arguments);
     } else {
       execute_command(command, arguments);
     }
