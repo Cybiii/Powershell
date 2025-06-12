@@ -4,6 +4,8 @@
 #include <vector>
 #include <windows.h> // For CreateProcess on Windows
 
+#include "filesystem.hpp"
+
 // Function to split a string by a delimiter
 std::vector<std::string> split_string(const std::string &s, char delimiter) {
   std::vector<std::string> tokens;
@@ -69,6 +71,13 @@ void execute_command(const std::string &command,
 }
 
 int main() {
+  // Enable virtual terminal processing for colors
+  HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+  DWORD dwMode = 0;
+  GetConsoleMode(hOut, &dwMode);
+  dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+  SetConsoleMode(hOut, dwMode);
+
   std::string input_line;
 
   while (true) {
@@ -122,6 +131,8 @@ int main() {
                     << " (Error " << GetLastError() << ")" << std::endl;
         }
       }
+    } else if (command == "ls") {
+      command_ls(arguments);
     } else {
       execute_command(command, arguments);
     }
