@@ -94,6 +94,101 @@ void list_directory(const std::string &path) {
   }
 }
 
+void command_mkdir(const std::vector<std::string> &args) {
+  if (args.empty()) {
+    fprintf(stderr, "mkdir: missing operand\n");
+    return;
+  }
+  for (const auto &dir_name : args) {
+    if (!CreateDirectoryA(dir_name.c_str(), NULL)) {
+      fprintf(stderr, "mkdir: cannot create directory '%s': Error %lu\n",
+              dir_name.c_str(), GetLastError());
+    }
+  }
+}
+
+void command_rm(const std::vector<std::string> &args) {
+  if (args.empty()) {
+    fprintf(stderr, "rm: missing operand\n");
+    return;
+  }
+
+  for (const auto &file_name : args) {
+    DWORD attrs = GetFileAttributesA(file_name.c_str());
+    if (attrs == INVALID_FILE_ATTRIBUTES) {
+      fprintf(stderr, "rm: cannot remove '%s': No such file or directory\n",
+              file_name.c_str());
+      continue;
+    }
+
+    if (attrs & FILE_ATTRIBUTE_DIRECTORY) {
+      // It's a directory, try to remove it with RemoveDirectoryA
+      if (!RemoveDirectoryA(file_name.c_str())) {
+        fprintf(stderr,
+                "rm: cannot remove '%s': Directory not empty or permission "
+                "denied. Error %lu\n",
+                file_name.c_str(), GetLastError());
+      }
+    } else {
+      // It's a file, use DeleteFileA
+      if (!DeleteFileA(file_name.c_str())) {
+        fprintf(stderr,
+                "rm: cannot remove '%s': Permission denied. Error %lu\n",
+                file_name.c_str(), GetLastError());
+      }
+    }
+  }
+}
+
+void command_touch(const std::vector<std::string> &args) {
+  if (args.empty()) {
+    fprintf(stderr, "touch: missing file operand\n");
+    return;
+  }
+  for (const auto &file_name : args) {
+    HANDLE hFile = CreateFileA(file_name.c_str(), GENERIC_WRITE,
+                               FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+                               OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+    if (hFile == INVALID_HANDLE_VALUE) {
+      fprintf(stderr, "touch: cannot touch '%s': Error %lu\n",
+              file_name.c_str(), GetLastError());
+    } else {
+      CloseHandle(hFile);
+    }
+  }
+}
+
+void command_cp(const std::vector<std::string> &args) {
+  if (args.size() != 2) {
+    fprintf(stderr, "cp: missing destination file operand after '%s'\n",
+            args.empty() ? "file" : args[0].c_str());
+    return;
+  }
+  const std::string &source = args[0];
+  const std::string &dest = args[1];
+
+  if (!CopyFileA(source.c_str(), dest.c_str(), FALSE)) { // FALSE to overwrite
+    fprintf(stderr, "cp: cannot copy '%s' to '%s': Error %lu\n", source.c_str(),
+            dest.c_str(), GetLastError());
+  }
+}
+
+void command_mv(const std::vector<std::string> &args) {
+  if (args.size() != 2) {
+    fprintf(stderr, "mv: missing destination file operand after '%s'\n",
+            args.empty() ? "file" : args[0].c_str());
+    return;
+  }
+  const std::string &source = args[0];
+  const std::string &dest = args[1];
+
+  if (!MoveFileA(source.c_str(), dest.c_str())) {
+    fprintf(stderr, "mv: cannot move '%s' to '%s': Error %lu\n", source.c_str(),
+            dest.c_str(), GetLastError());
+  }
+}
+
 void command_ls(const std::vector<std::string> &args) {
   if (args.empty()) {
     list_directory(".");

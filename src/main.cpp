@@ -108,10 +108,12 @@ int main() {
     } else if (command == "pwd") {
       char buffer[MAX_PATH];
       if (GetCurrentDirectoryA(MAX_PATH, buffer)) {
-        std::cout << buffer << std::endl;
+        printf("Path\n");
+        printf("----\n");
+        printf("%s\n", buffer);
       } else {
-        std::cerr << "pwd: could not get current directory (Error "
-                  << GetLastError() << ")" << std::endl;
+        fprintf(stderr, "pwd: could not get current directory (Error %lu)\n",
+                GetLastError());
       }
     } else if (command == "echo") {
       for (size_t i = 0; i < arguments.size(); ++i) {
@@ -127,12 +129,23 @@ int main() {
         if (SetCurrentDirectoryA(arguments[0].c_str())) {
           // Optionally print new directory or handle errors
         } else {
-          std::cerr << "cd: could not change directory to " << arguments[0]
-                    << " (Error " << GetLastError() << ")" << std::endl;
+          fprintf(stderr,
+                  "cd: could not change directory to '%s' (Error %lu)\n",
+                  arguments[0].c_str(), GetLastError());
         }
       }
     } else if (command == "ls") {
       command_ls(arguments);
+    } else if (command == "mkdir") {
+      command_mkdir(arguments);
+    } else if (command == "touch") {
+      command_touch(arguments);
+    } else if (command == "rm") {
+      command_rm(arguments);
+    } else if (command == "mv") {
+      command_mv(arguments);
+    } else if (command == "cp") {
+      command_cp(arguments);
     } else {
       execute_command(command, arguments);
     }
